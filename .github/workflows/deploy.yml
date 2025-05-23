@@ -42,7 +42,7 @@ jobs:
 
     - name: Update kubeconfig for EKS
       run: |
-        aws eks update-kubeconfig --name wiz-cluster --region ${{ env.AWS_REGION }}
+        aws eks update-kubeconfig --name greg-wiz-cluster --region ${{ env.AWS_REGION }}
 
     - name: Deploy with Terraform
       working-directory: terraform
