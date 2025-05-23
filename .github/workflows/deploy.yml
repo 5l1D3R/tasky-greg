@@ -1,0 +1,54 @@
+name: Build and Deploy Tasky to EKS
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  AWS_REGION: us-east-1
+  ECR_REPO: tasky
+  ACCOUNT_ID: 565393052020
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ${{ env.AWS_REGION }}
+
+    - name: Get AWS Account ID
+      id: account
+      run: echo "ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)" >> $GITHUB_ENV
+
+    - name: Login to Amazon ECR
+      run: |
+        aws ecr get-login-password | docker login \
+          --username AWS \
+          --password-stdin ${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
+
+    - name: Build and push Docker image
+      run: |
+        docker build -t tasky .
+        docker tag tasky:latest ${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/tasky:latest
+        docker push ${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/tasky:latest
+
+    - name: Update kubeconfig for EKS
+      run: |
+        aws eks update-kubeconfig --name wiz-cluster --region ${{ env.AWS_REGION }}
+
+    - name: Deploy with Terraform
+      working-directory: terraform
+      run: |
+        terraform init
+        terraform apply -auto-approve \
+          -var="mongo_uri=${{ secrets.MONGO_URI }}" \
+          -var="secret_key=${{ secrets.SECRET_KEY }}" \
+          -var="image_url=${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/tasky:latest"
