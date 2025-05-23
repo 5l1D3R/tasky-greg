@@ -44,6 +44,11 @@ jobs:
       run: |
         aws eks update-kubeconfig --name greg-wiz-cluster --region ${{ env.AWS_REGION }}
 
+    - name: Install Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.5.7
+        
     - name: Deploy with Terraform
       working-directory: terraform
       run: |
