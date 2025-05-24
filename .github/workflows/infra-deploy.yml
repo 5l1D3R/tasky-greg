@@ -46,7 +46,9 @@ jobs:
       uses: hashicorp/setup-terraform@v2
       with:
         terraform_version: 1.5.7
-        
+    - name: Debug image_url
+      run: echo "${{ inputs.image_url }}"
+
     - name: Deploy with Terraform
       working-directory: terraform
       run: |
