@@ -47,3 +47,4 @@ jobs:
         git add .image_tag
         git commit -m "Trigger deploy with new image"
         git push
+#test
