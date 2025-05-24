@@ -11,8 +11,6 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    outputs:
-      image_url: ${{ steps.set_output.outputs.image_url }}
 
     steps:
     - name: Checkout repository
@@ -41,20 +39,11 @@ jobs:
         docker tag tasky:latest ${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/tasky:latest
         docker push ${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/tasky:latest
 
-    - name: Set image URL output
-      id: set_output
+    - name: Write image URL to .image_tag and commit it
       run: |
-        ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-        echo "image_url=${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/tasky:latest" >> $GITHUB_OUTPUT
-
-  call-infra:
-    needs: build
-    uses: ./.github/workflows/infra-deploy.yml
-    with:
-      image_url: ${{ needs.build.outputs.image_url }}
-    secrets:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      MONGO_URI: ${{ secrets.MONGO_URI }}
-      SECRET_KEY: ${{ secrets.SECRET_KEY }}
-#
+        echo "${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/tasky:latest" > .image_tag
+        git config --global user.name "github-actions"
+        git config --global user.email "github-actions@github.com"
+        git add .image_tag
+        git commit -m "Trigger deploy with new image"
+        git push
