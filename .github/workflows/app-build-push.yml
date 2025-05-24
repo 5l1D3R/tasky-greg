@@ -1,4 +1,4 @@
-name: Build and Deploy Tasky to EKS
+name: Build and Push Tasky Image to EKS
 
 on:
   push:
@@ -10,9 +10,10 @@ env:
   ACCOUNT_ID: 565393052020
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-
+    outputs:
+      image_url: ${{ steps.image.outputs.image_url }}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
@@ -40,20 +41,12 @@ jobs:
         docker tag tasky:latest ${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/tasky:latest
         docker push ${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/tasky:latest
 
-    - name: Update kubeconfig for EKS
-      run: |
-        aws eks update-kubeconfig --name greg-wiz-cluster --region ${{ env.AWS_REGION }}
+    - name: Set image URL output
+      id: image
+      run: echo "image_url=${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/tasky:latest" >> $GITHUB_OUTPUT
 
-    - name: Install Terraform
-      uses: hashicorp/setup-terraform@v2
-      with:
-        terraform_version: 1.5.7
-        
-    - name: Deploy with Terraform
-      working-directory: terraform
-      run: |
-        terraform init
-        terraform apply -auto-approve \
-          -var="mongo_uri=${{ secrets.MONGO_URI }}" \
-          -var="secret_key=${{ secrets.SECRET_KEY }}" \
-          -var="image_url=${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/tasky:latest"
+  call-infra:
+    needs: build
+    uses: ./.github/workflows/infra-deploy.yml
+    with:
+      image_url: ${{ needs.build.outputs.image_url }}
