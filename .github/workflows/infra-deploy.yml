@@ -49,7 +49,7 @@ jobs:
         terraform_version: 1.5.7
 
     - name: Print input image_url
-      run: echo "Image URL received: ${{ inputs.image_url }}"
+      run: "echo Image URL received: ${{ inputs.image_url }}"
 
     - name: Deploy with Terraform
       working-directory: terraform
