@@ -50,7 +50,7 @@ jobs:
           git commit -m "Trigger deploy at $(date)"
           git push
 
-    - name: Trigger deploy workflow via PAT
+    - name: Trigger deploy workflow
       run: |
         curl -X POST \
           -H "Accept: application/vnd.github+json" \
