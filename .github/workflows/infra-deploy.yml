@@ -1,20 +1,8 @@
 name: Deploy Infrastructure
 
 on:
-  workflow_call:
-    inputs:
-      image_url:
-        required: true
-        type: string
-    secrets:
-      AWS_ACCESS_KEY_ID:
-        required: true
-      AWS_SECRET_ACCESS_KEY:
-        required: true
-      MONGO_URI:
-        required: true
-      SECRET_KEY:
-        required: true
+  workflow_dispatch:
+    
 env:
   AWS_REGION: us-east-1
   ECR_REPO: tasky

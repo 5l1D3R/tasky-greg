@@ -12,8 +12,6 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    outputs:
-      image_url: ${{ steps.set_output.outputs.image_url }}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
@@ -25,9 +23,9 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
 
-    #- name: Get AWS Account ID
-    #  id: account
-    #  run: echo "ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)" >> $GITHUB_ENV
+    - name: Get AWS Account ID
+      id: account
+      run: echo "ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)" >> $GITHUB_ENV
 
     - name: Login to Amazon ECR
       run: |
@@ -41,17 +39,10 @@ jobs:
         docker tag tasky:latest ${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/tasky:latest
         docker push ${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/tasky:latest
 
-    - name: Set image URL output
-      id: set_output
-      run: echo "image_url=${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/tasky:latest" >> $GITHUB_OUTPUT
-
-  call-infra:
-    needs: build
-    uses: ./.github/workflows/infra-deploy.yml
-    with:
-      image_url: ${{ needs.build.outputs.image_url }}
-    secrets:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      MONGO_URI: ${{ secrets.MONGO_URI }}
-      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+    - name: Trigger second workflow via API
+      run: |
+        curl -X POST \
+        -H "Accept: application/vnd.github+json" \
+        -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+        https://api.github.com/repos/${{ github.repository }}/actions/workflows/infra-deploy.yml/dispatches \
+        -d '{"ref":"main"}'
