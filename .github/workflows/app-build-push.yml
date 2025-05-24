@@ -39,21 +39,16 @@ jobs:
         docker tag tasky:latest ${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/tasky:latest
         docker push ${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/tasky:latest
 
-    - name: Write image tag and push if changed
+    - name: Write .image_tag with timestamp and push
       run: |
-        echo "${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/tasky:latest" > .image_tag
+          echo "${{ env.ACCOUNT_ID }}.dkr.ecr.us-east-1.amazonaws.com/tasky:latest # $(date +%s)" > .image_tag
 
-        git config --global user.name "github-actions"
-        git config --global user.email "github-actions@github.com"
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
 
-        git add .image_tag
-
-        if git diff --cached --quiet; then
-          echo "No changes to commit"
-        else
-          git commit -m "Trigger deploy with new image"
+          git add .image_tag
+          git commit -m "Trigger deploy at $(date)"
           git push
-        fi
 
     - name: Trigger infra via dispatch fallback
       run: |

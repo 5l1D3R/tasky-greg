@@ -36,7 +36,7 @@ jobs:
     - name: Read image URL from file
       id: read_image
       run: |
-        IMAGE=$(cat .image_tag)
+        IMAGE=$(cut -d'#' -f1 < .image_tag | xargs)
         echo "IMAGE_URL=$IMAGE" >> $GITHUB_ENV
 
     - name: Deploy with Terraform
