@@ -46,3 +46,4 @@ jobs:
         -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
         https://api.github.com/repos/${{ github.repository }}/actions/workflows/infra-deploy.yml/dispatches \
         -d '{"ref":"main"}'
+#test
