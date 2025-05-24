@@ -1,9 +1,7 @@
 name: Deploy Infrastructure
 
 on:
-  push:
-    paths:
-      - .image_tag
+  workflow_dispatch:
 
 env:
   AWS_REGION: us-east-1
