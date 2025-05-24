@@ -1,12 +1,25 @@
 name: Deploy Infrastructure
 
 on:
-  workflow_dispatch:
+  workflow_call:
+    inputs:
+      image_url:
+        required: true
+        type: string
+    secrets:
+      AWS_ACCESS_KEY_ID:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      MONGO_URI:
+        required: true
+      SECRET_KEY:
+        required: true
 
 env:
   AWS_REGION: us-east-1
-  ECR_REPO: tasky
-  ACCOUNT_ID: 565393052020
+  #ECR_REPO: tasky
+  #ACCOUNT_ID: 565393052020
 
 jobs:
   deploy:
@@ -22,9 +35,9 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
 
-    - name: Get AWS Account ID
-      id: account
-      run: echo "ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)" >> $GITHUB_ENV
+    #- name: Get AWS Account ID
+    #  id: account
+    #  run: echo "ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)" >> $GITHUB_ENV
 
     - name: Update kubeconfig for EKS
       run: |
@@ -35,6 +48,9 @@ jobs:
       with:
         terraform_version: 1.5.7
 
+    - name: Debug image URL
+      run: "echo Deploying image: ${{ inputs.image_url }}"
+
     - name: Deploy with Terraform
       working-directory: terraform
       run: |
@@ -42,4 +58,4 @@ jobs:
         terraform apply -auto-approve \
           -var="mongo_uri=${{ secrets.MONGO_URI }}" \
           -var="secret_key=${{ secrets.SECRET_KEY }}" \
-          -var="image_url=${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/tasky:latest"
+          -var="image_url=${{ inputs.image_url }}"
