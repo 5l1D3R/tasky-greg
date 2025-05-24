@@ -45,13 +45,13 @@ jobs:
       id: set_output
       run: |
         ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-        echo "image_url=${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/tasky:latest" >> $GITHUB_OUTPUT
+        echo "image_url=${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/tasky:latest" >> $GITHUB_OUTPUT
 
   call-infra:
     needs: build
     uses: ./.github/workflows/infra-deploy.yml
     with:
-      image_url: "565393052020.dkr.ecr.us-east-1.amazonaws.com/tasky:latest"
+      image_url: ${{ needs.build.outputs.image_url }}
     secrets:
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
