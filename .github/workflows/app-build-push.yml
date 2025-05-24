@@ -50,3 +50,8 @@ jobs:
     uses: ./.github/workflows/infra-deploy.yml
     with:
       image_url: ${{ needs.build.outputs.image_url }}
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      MONGO_URI: ${{ secrets.MONGO_URI }}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
