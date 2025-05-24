@@ -13,7 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     outputs:
-      image_url: ${{ steps.image.outputs.image_url }}
+      image_url: ${{ steps.set_output.outputs.image_url }}
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
@@ -42,7 +42,7 @@ jobs:
         docker push ${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/tasky:latest
 
     - name: Set image URL output
-      id: image
+      id: set_output
       run: echo "image_url=${{ env.ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/tasky:latest" >> $GITHUB_OUTPUT
 
   call-infra:
