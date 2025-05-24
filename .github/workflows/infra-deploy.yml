@@ -22,14 +22,15 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: ${{ env.AWS_REGION }}
     
-    - name: Delete existing tasky Deployment (keep service)
-      continue-on-error: true
-      run: |
-        kubectl delete deployment tasky || true
 
     - name: Update kubeconfig for EKS
       run: |
         aws eks update-kubeconfig --name greg-wiz-cluster --region ${{ env.AWS_REGION }}
+
+    - name: Delete existing tasky Deployment (keep service)
+      continue-on-error: true
+      run: |
+        kubectl delete deployment tasky || true
 
     - name: Install Terraform
       uses: hashicorp/setup-terraform@v2
