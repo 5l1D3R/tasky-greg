@@ -1,0 +1,5 @@
+ami_id     = "ami-07b1ff916ba4495ab"
+key_name   = "greg-wiz-db"
+vpc_id     = "vpc-01342ea4eb106f05b"
+subnet_id  = "subnet-0ca3b648f32d2c6a8"
+eks_cidr   = "192.168.0.0/16"

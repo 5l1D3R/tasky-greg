@@ -12,7 +12,7 @@ FROM alpine:3.17.0 as release
 WORKDIR /app
 COPY --from=build  /go/src/tasky/tasky .
 COPY --from=build  /go/src/tasky/assets ./assets
-RUN echo "GREG WIZ FILE TEST COMPLETE" > /wizexercise.txt
+RUN echo "GREG WIZ FILE TEST COMPLETE 2" > /wizexercise.txt
 EXPOSE 8080
 ENTRYPOINT ["/app/tasky"]
 
